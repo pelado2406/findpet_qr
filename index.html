@@ -1,27 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Escaneo de QR</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Encontré una Mascota</title>
 </head>
 <body>
-  <h1>Escaneo de QR</h1>
-  <p>Escaneá el código QR y validá tu código:</p>
-  <input type="text" id="codigo" placeholder="Código recibido" />
-  <button onclick="validarCodigo()">Validar</button>
+  <h2>¿Encontraste una mascota?</h2>
+  <p>Escaneá el QR o ingresá el código del collar:</p>
+
+  <input type="text" id="codigo" placeholder="Ingresá el código" />
+  <button onclick="validarCodigoManual()">Verificar</button>
 
   <script>
- const codigosValidos = ['v9v69e', '4a7eq6', 'y4f9ut', 'niqir4', 'y635ki', '344cf2', 'klsfk9', 'd3yik9', 'mjntxs', '8v5q75', 't4zhom', 'bwokl7', 'xsl38b', 'z3z91f', 'sbd7o6', '6tipg9', '40a7mk', 'l1tcjw', 'vejpmm', '84mas5', 'zi2lf0', 'fuusbv', '7zb669', 'gs6uy9', 'xozl78', '0tieik', 'zzr71s', 'rc8rro', 'hlsid0', '1xy2pf', 'wko3r3', 'jh7oq9', '977c92', '8xxxis', '0cit5x', 'bx1fy7', 'uf6eui', '3e553z', '2dix70', '64m5k3', 'dgs3iy', 'ai5dia', 'xdurtj', 'hbezk3', 'lse94m', 'x3pm5h', 'bkwwxu', '8b392z', 'lnvt2n', 'pycsi4'];
+    const codigosValidos = ['v9v69e', '4a7eq6', 'y4f9ut', 'niqi4r', 'y635ki', '344cf2'];
 
-
-    function validarCodigo() {
+    function validarCodigoManual() {
       const codigo = document.getElementById("codigo").value.trim();
+      validarCodigo(codigo);
+    }
+
+    function validarCodigo(codigo) {
       if (codigosValidos.includes(codigo)) {
         window.location.href = `registro.html?codigo=${codigo}`;
       } else {
-        alert("Código inválido. Probá de nuevo.");
+        alert("⚠️ Código inválido. Probá de nuevo.");
       }
     }
+
+    // Si viene código por parámetro en la URL, se valida solo
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const codigo = params.get("code");
+      if (codigo) {
+        validarCodigo(codigo);
+      }
+    };
   </script>
 </body>
 </html>
+
