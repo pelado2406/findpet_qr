@@ -1,16 +1,26 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Escanear QR</title>
+  <meta charset="UTF-8">
+  <title>Escaneo de QR</title>
 </head>
 <body>
-    <h1>Escaneo de QR</h1>
-    <p>Escaneá el código QR y validá tu código:</p>
-    <form action="registro.html" method="GET">
-        <input type="text" name="code" placeholder="Código recibido" required>
-        <button type="submit">Validar</button>
-    </form>
+  <h1>Escaneo de QR</h1>
+  <p>Escaneá el código QR y validá tu código:</p>
+  <input type="text" id="codigo" placeholder="Código recibido" />
+  <button onclick="validarCodigo()">Validar</button>
+
+  <script>
+    const codigosValidos = ["abc123", "pancha456", "gato789"];
+
+    function validarCodigo() {
+      const codigo = document.getElementById("codigo").value.trim();
+      if (codigosValidos.includes(codigo)) {
+        window.location.href = `registro.html?codigo=${codigo}`;
+      } else {
+        alert("Código inválido. Probá de nuevo.");
+      }
+    }
+  </script>
 </body>
 </html>
