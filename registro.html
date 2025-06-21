@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Mascota</title>
+</head>
+<body>
+    <h1>Formulario de Registro de Mascota</h1>
+    <form id="registroForm">
+        <input type="text" name="nombre" placeholder="Nombre de la mascota" required><br>
+        <input type="text" name="telefono" placeholder="Teléfono de contacto" required><br>
+        <input type="text" name="whatsapp" placeholder="Número de WhatsApp" required><br>
+        <input type="text" name="direccion" placeholder="Dirección donde vive" required><br>
+        <button type="submit">Registrar</button>
+    </form>
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const data = new FormData(event.target);
+            const nombre = data.get('nombre');
+            const telefono = data.get('telefono');
+            const whatsapp = data.get('whatsapp');
+            const direccion = data.get('direccion');
+
+            const mensaje = `🐶 Nueva mascota registrada: %0A📛 Nombre: ${nombre} %0A📱 Teléfono: ${telefono} %0A💬 WhatsApp: ${whatsapp} %0A🏠 Dirección: ${direccion}`;
+            const numeroAdmin = '2974019267';
+            const url = `https://api.whatsapp.com/send?phone=+549${numeroAdmin}&text=${mensaje}`;
+            window.open(url, '_blank');
+        });
+    </script>
+</body>
+</html>
