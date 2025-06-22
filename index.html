@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Encontré una Mascota</title>
 </head>
 <body>
   <h2>¿Encontraste una mascota?</h2>
-  <p>Escaneá el QR o ingresá el código del collar:</p>
+  <p>📲 Escaneá el QR o ingresá el código del collar:</p>
 
   <input type="text" id="codigo" placeholder="Ingresá el código" />
-  <button onclick="validarCodigoManual()">Verificar</button>
+  <button onclick="validarCodigoManual()">✅ Verificar</button>
 
   <script>
     const codigosValidos = ['v9v69e', '4a7eq6', 'y4f9ut', 'niqi4r', 'y635ki', '344cf2'];
@@ -22,13 +22,13 @@
 
     function validarCodigo(codigo) {
       if (codigosValidos.includes(codigo)) {
-        window.location.href = `registro.html?codigo=${codigo}`;
+        window.location.href = `https://findpetqr.netlify.app/registro.html?code=${codigo}`;
       } else {
         alert("⚠️ Código inválido. Probá de nuevo.");
       }
     }
 
-    // Si viene código por parámetro en la URL, se valida solo
+    // Validación automática si el código viene en la URL
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       const codigo = params.get("code");
@@ -39,4 +39,5 @@
   </script>
 </body>
 </html>
+
 
