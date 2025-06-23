@@ -1,131 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Registrar Mascota</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
-<body>
+<body style="max-width: 480px; margin: auto;">
   <h2>Registrar Mascota</h2>
-  <form onsubmit="event.preventDefault(); generarFichaYSubir();" style="max-width:400px;margin:auto;">
-    <label for="nombre">🐶 Nombre:</label>
-    <input type="text" id="nombre" required><br><br>
-
-    <label for="telefono">📞 Teléfono:</label>
-    <input type="tel" id="telefono" required><br><br>
-
-    <label for="whatsapp">💬 WhatsApp (sin +):</label>
-    <input type="tel" id="whatsapp" required><br><br>
-
-    <label for="direccion">📍 Dirección:</label>
-    <input type="text" id="direccion" required><br><br>
-
+  <form onsubmit="event.preventDefault(); generarFichaYSubir();">
+    🐶 Nombre: <input id="nombre" type="text" /><br /><br />
+    📞 Teléfono: <input id="telefono" type="text" /><br /><br />
+    💬 WhatsApp (sin +): <input id="whatsapp" type="text" /><br /><br />
+    📍 Dirección: <input id="direccion" type="text" /><br /><br />
     <button type="submit">✅ Crear Ficha</button>
   </form>
 
-  <div id="qrContainer" style="text-align:center; margin-top:20px; display:none;">
-    <h3>📛 Código QR de la ficha</h3>
-    <canvas id="qrCanvas"></canvas><br>
-    <button onclick="descargarQR()">⬇️ Descargar QR</button>
-  </div>
-
-<script>
-function obtenerCodigoDesdeURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('code');
-}
-
-async function verificarCodigoDisponible(codigo) {
-  const url = `https://raw.githubusercontent.com/pelado2406/findpet_qr/main/fichas/${codigo}.html`;
-  const resp = await fetch(url);
-  return !resp.ok;
-}
-
-async function subirFichaAGithub(nombreArchivo, contenidoHTML, urlFinal) {
-  const token = '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';
-  const usuario = 'pelado2406';
-  const repositorio = 'findpet_qr';
-  const rama = 'main';
-  const ruta = `fichas/${nombreArchivo}.html`;
-
-  const getUrl = `https://api.github.com/repos/${usuario}/${repositorio}/contents/${ruta}`;
-
-  let sha = null;
-  const checkResp = await fetch(getUrl, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (checkResp.ok) {
-    const data = await checkResp.json();
-    sha = data.sha;
-  }
-
-  const contenidoBase64 = btoa(unescape(encodeURIComponent(contenidoHTML)));
-
-  const resp = await fetch(getUrl, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: `Crear ficha de mascota ${nombreArchivo}`,
-      content: contenidoBase64,
-      branch: rama,
-      ...(sha && { sha })
-    })
-  });
-
-  if (resp.ok) {
-    alert("✅ Ficha subida correctamente.");
-    window.location.href = urlFinal;
-  } else {
-    alert("❌ Error al subir la ficha.");
-  }
-}
-
-function generarFichaYSubir() {
-  const nombre = document.getElementById("nombre").value.trim();
-  const telefono = document.getElementById("telefono").value.trim();
-  const whatsapp = document.getElementById("whatsapp").value.trim();
-  const direccion = document.getElementById("direccion").value.trim();
-  const codigo = obtenerCodigoDesdeURL();
-
-  if (!codigo) {
-    alert("❌ Código no encontrado en la URL.");
-    return;
-  }
-
-  const html = `
-  <html><head><meta charset="UTF-8"><title>${nombre}</title></head><body>
-  <h2>🐶 Mascota Perdida</h2>
-  <p><strong>Nombre:</strong> ${nombre}</p>
-  <p><strong>Teléfono:</strong> <a href="tel:${telefono}">${telefono}</a></p>
-  <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp}" target="_blank">${whatsapp}</a></p>
-  <p><strong>Dirección:</strong> ${direccion}</p>
-  <p><a href="https://maps.google.com/?q=${encodeURIComponent(direccion)}" target="_blank">📍 Ver Ubicación</a></p>
-  </body></html>`;
-
-  const urlFinal = `https://pelado2406.github.io/findpet_qr/fichas/${codigo}.html`;
-  subirFichaAGithub(codigo, html, urlFinal);
-
-  QRCode.toCanvas(document.getElementById('qrCanvas'), urlFinal, function (error) {
-    if (!error) {
-      document.getElementById('qrContainer').style.display = 'block';
-    }
-  });
-}
-
-function descargarQR() {
-  const canvas = document.getElementById('qrCanvas');
-  const link = document.createElement('a');
-  link.download = "codigo_qr.png";
-  link.href = canvas.toDataURL();
-  link.click();
-}
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-
 
