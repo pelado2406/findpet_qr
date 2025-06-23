@@ -1,46 +1,158 @@
-<!DOCTYPE html>
+<form onsubmit="event.preventDefault(); generarFichaYSubir();" style="max-width:400px;margin:auto;">
+  <h2>Registrar Mascota</h2>
+  <label for="nombre">🐶 Nombre:</label>
+  <input type="text" id="nombre" required><br><br>
+
+  <label for="telefono">📞 Teléfono:</label>
+  <input type="tel" id="telefono" required><br><br>
+
+  <label for="whatsapp">💬 WhatsApp (sin +):</label>
+  <input type="tel" id="whatsapp" required><br><br>
+
+  <label for="direccion">📍 Dirección:</label>
+  <input type="text" id="direccion" required><br><br>
+
+  <button type="submit">✅ Crear Ficha</button>
+</form>
+
+<div id="qrContainer" style="text-align:center; margin-top:20px; display:none;">
+  <h3>📌 Código QR de la ficha</h3>
+  <canvas id="qrCanvas"></canvas><br>
+  <button onclick="descargarQR()">⬇️ Descargar QR</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+function obtenerCodigoDesdeURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('code');
+}
+
+async function verificarCodigoDisponible(codigo) {
+  const url = `https://raw.githubusercontent.com/pelado2406/findpet_qr/main/fichas/${codigo}.html`;
+  const resp = await fetch(url);
+  return !resp.ok;
+}
+
+async function subirFichaAGithub(nombreArchivo, contenidoHTML, urlFinal) {
+  const token = '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';
+  const usuario = 'pelado2406';
+  const repositorio = 'findpet_qr';
+  const rutaArchivo = `fichas/${nombreArchivo}`;
+  const apiUrl = `https://api.github.com/repos/${usuario}/${repositorio}/contents/${rutaArchivo}`;
+
+  const contenidoCodificado = btoa(unescape(encodeURIComponent(contenidoHTML)));
+
+  const body = {
+    message: `Subir ficha ${nombreArchivo}`,
+    content: contenidoCodificado
+  };
+
+  const respuesta = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  const datos = await respuesta.json();
+  if (respuesta.ok) {
+    console.log(`✅ Ficha subida: ${datos.content.path}`);
+    generarQR(urlFinal);
+    alert('Ficha subida correctamente.');
+
+    setTimeout(() => {
+      window.location.href = urlFinal;
+    }, 2000);
+
+  } else {
+    console.error('❌ Error al subir la ficha:', datos);
+    alert('Error al subir la ficha.');
+  }
+}
+
+async function generarFichaYSubir() {
+  const codigo = obtenerCodigoDesdeURL();
+  if (!codigo) {
+    alert('Código inválido o faltante en el link.');
+    return;
+  }
+
+  const disponible = await verificarCodigoDisponible(codigo);
+  if (!disponible) {
+    alert('Este código ya fue usado.');
+    return;
+  }
+
+  const nombre = document.getElementById('nombre').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const whatsapp = document.getElementById('whatsapp').value.trim();
+  const direccion = document.getElementById('direccion').value.trim();
+
+  if (!nombre || !telefono || !whatsapp || !direccion) {
+    alert('Completá todos los campos.');
+    return;
+  }
+
+  const nombreArchivo = `${codigo}.html`;
+  const contenidoHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Formulario de Registro de Mascota</title>
+  <title>🐾 Mascota encontrada</title>
 </head>
 <body>
-  <h1>Formulario de Registro de Mascota</h1>
-  <form id="registroForm">
-    <input type="text" id="nombre" placeholder="Nombre de la mascota" required><br>
-    <input type="text" id="telefono" placeholder="Teléfono de contacto" required><br>
-    <input type="text" id="whatsapp" placeholder="Número de WhatsApp" required><br>
-    <input type="text" id="direccion" placeholder="Dirección donde vive" required><br>
-    <button type="submit">Registrar</button>
-  </form>
-
-  <script>
-    const form = document.getElementById('registroForm');
-
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const codigo = urlParams.get('codigo') || 'N/A';
-
-      const nombre = document.getElementById('nombre').value;
-      const telefono = document.getElementById('telefono').value;
-      const whatsapp = document.getElementById('whatsapp').value;
-      const direccion = document.getElementById('direccion').value;
-
-      const mensaje = `🐶 Nueva mascota registrada:\n` +
-                      `🔖 Código: ${codigo}\n` +
-                      `📛 Nombre: ${nombre}\n` +
-                      `📞 Teléfono: ${telefono}\n` +
-                      `💬 WhatsApp: ${whatsapp}\n` +
-                      `🏠 Dirección: ${direccion}`;
-
-      const numeroDestino = "2974019267"; // Tu número de WhatsApp
-      const url = `https://wa.me/${numeroDestino}?text=${encodeURIComponent(mensaje)}`;
-
-      window.open(url, '_blank');
-    });
-  </script>
+  <h1>¡Encontraste a ${nombre}!</h1>
+  <p>📞 Teléfono: <a href="tel:${telefono}">${telefono}</a></p>
+  <p>💬 WhatsApp: <a href="https://wa.me/${whatsapp}">Mandar mensaje</a></p>
+  <p>📍 Dirección: ${direccion}</p>
 </body>
-</html>
+</html>`;
+
+  const urlFicha = `https://findpetqr.netlify.app/fichas/${nombreArchivo}`;
+  subirFichaAGithub(nombreArchivo, contenidoHTML, urlFicha);
+}
+
+function generarQR(url) {
+  const qrContainer = document.getElementById('qrContainer');
+  const canvas = document.getElementById('qrCanvas');
+  qrContainer.style.display = 'block';
+  QRCode.toCanvas(canvas, url, { width: 200 }, function (error) {
+    if (error) console.error(error);
+    console.log('QR generado');
+  });
+}
+
+function descargarQR() {
+  const canvas = document.getElementById('qrCanvas');
+  const link = document.createElement('a');
+  link.download = 'qr_mascota.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+</script>
+
+<!-- Sistema de generación de link personalizado con código -->
+<div style="text-align:center; margin-top:40px;">
+  <h2>🔗 Crear Link para Cliente</h2>
+  <input type="text" id="nuevoCodigo" placeholder="Ej: fido123" style="width:200px;"> 
+  <button onclick="generarLinkCliente()">🎯 Generar Link</button>
+  <p id="linkGenerado"></p>
+</div>
+
+<script>
+function generarLinkCliente() {
+  const codigo = document.getElementById('nuevoCodigo').value.trim();
+  if (!codigo) {
+    alert('Escribí un código.');
+    return;
+  }
+  const link = `https://findpetqr.netlify.app/registro.html?code=${codigo}`;
+  const p = document.getElementById('linkGenerado');
+  p.innerHTML = `Link: <a href="${link}" target="_blank">${link}</a>`;
+}
+</script>
+
 
