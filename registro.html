@@ -1,150 +1,99 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registrar Mascota</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #f7f7f7;
-    }
-    .container {
-      max-width: 600px;
-      margin-top: 40px;
-      background-color: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    body { font-family: sans-serif; background: #f4f4f4; padding: 2rem; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #4CAF50; color: white; border: none; font-weight: bold; }
+    button:hover { background: #45a049; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Registrar Mascota</h2>
-    <p><strong>Código:</strong> <span id="codigo"></span></p>
-    <form id="formulario">
-      <div class="mb-3">
-        <input type="text" class="form-control" id="nombre" placeholder="Nombre de la mascota" required />
-      </div>
-      <div class="mb-3">
-        <input type="tel" class="form-control" id="telefono" placeholder="Teléfono" required />
-      </div>
-      <div class="mb-3">
-        <input type="text" class="form-control" id="direccion" placeholder="Dirección" required />
-      </div>
-      <div class="mb-3">
-        <input type="text" class="form-control" id="mensaje" placeholder="Mensaje (opcional)" />
-      </div>
-      <div class="mb-3">
-        <input type="file" class="form-control" id="foto" accept="image/*" required />
-      </div>
-      <button type="submit" class="btn btn-success w-100">Subir ficha</button>
-    </form>
-    <p class="mt-3 text-danger" id="error"></p>
-    <p class="mt-3 text-success" id="ok"></p>
+    <p id="codigo"></p>
+    <input type="text" id="nombre" placeholder="Nombre de la mascota" />
+    <input type="text" id="telefono" placeholder="Teléfono de contacto" />
+    <input type="text" id="direccion" placeholder="Dirección donde fue vista" />
+    <textarea id="mensaje" placeholder="Mensaje (opcional)"></textarea>
+    <input type="file" id="foto" />
+    <button onclick="subirFicha()">Subir ficha</button>
+    <p id="estado"></p>
   </div>
 
   <script>
-    const code = new URLSearchParams(window.location.search).get('code');
-    document.getElementById("codigo").innerText = code;
+    const token = "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";
+    const repo = "pelado2406/findpet_qr";
+    const branch = "main";
 
-    const form = document.getElementById("formulario");
-    const error = document.getElementById("error");
-    const ok = document.getElementById("ok");
+    const code = new URLSearchParams(location.search).get("code");
+    document.getElementById("codigo").textContent = "Código: " + code;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      error.innerText = "";
-      ok.innerText = "";
+    async function subirFicha() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+      const direccion = document.getElementById("direccion").value.trim();
+      const mensaje = document.getElementById("mensaje").value.trim();
+      const foto = document.getElementById("foto").files[0];
 
-      const nombre = document.getElementById("nombre").value;
-      const telefono = document.getElementById("telefono").value;
-      const direccion = document.getElementById("direccion").value;
-      const mensaje = document.getElementById("mensaje").value;
-      const fotoInput = document.getElementById("foto");
-      const foto = fotoInput.files[0];
-
-      if (!foto) {
-        error.innerText = "Seleccioná una imagen.";
+      if (!nombre || !telefono || !direccion || !foto) {
+        alert("Por favor completá todos los campos obligatorios.");
         return;
       }
 
       const reader = new FileReader();
-      reader.onload = async function () {
-        const base64Image = reader.result;
-
+      reader.onloadend = async () => {
+        const imgBase64 = reader.result.split(",")[1];
         const htmlContent = `
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>${nombre}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f7f7f7;
-    }
-    .card {
-      max-width: 400px;
-      margin: 50px auto;
-      padding: 30px;
-      text-align: center;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    .card img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 20px;
-    }
-    .card h2 {
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <img src="${base64Image}" alt="Mascota">
-    <h2>${nombre}</h2>
-    <p>${mensaje}</p>
-    <a href="tel:${telefono}" class="btn btn-success m-2">Llamar</a>
-    <a href="https://wa.me/${telefono}" class="btn btn-success m-2">WhatsApp</a>
-    <a href="https://www.google.com/maps/search/${encodeURIComponent(direccion)}" target="_blank" class="btn btn-primary m-2">Ubicación</a>
-  </div>
-</body>
-</html>`;
+<html lang="es"><head><meta charset="UTF-8"><title>${nombre}</title></head><body>
+<h1>${nombre}</h1>
+<img src="https://raw.githubusercontent.com/pelado2406/findpet_qr/main/fotos/${code}.jpg" style="width:200px;height:200px;border-radius:50%;object-fit:cover;"><br>
+<a href="tel:${telefono}">📞 Llamar</a><br>
+<a href="https://wa.me/${telefono}">💬 WhatsApp</a><br>
+<a href="https://maps.google.com/?q=${encodeURIComponent(direccion)}">📍 Ver ubicación</a><br>
+<p>${mensaje}</p></body></html>`;
 
-        const response = await fetch("https://api.github.com/repos/pelado2406/findpet_qr/contents/fichas/" + code + ".html", {
+        const content = btoa(unescape(encodeURIComponent(htmlContent)));
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/fichas/${code}.html`, {
           method: "PUT",
           headers: {
-            "Authorization": "Bearer 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",
+            "Authorization": "Bearer " + token,
             "Accept": "application/vnd.github+json"
           },
           body: JSON.stringify({
-            message: "crear ficha " + code,
-            content: btoa(unescape(encodeURIComponent(htmlContent)))
+            message: "Subida de ficha " + code,
+            content: content,
+            branch: branch
           })
         });
 
-        if (response.ok) {
-          ok.innerText = "Ficha creada correctamente.";
-          form.reset();
+        const resFoto = await fetch(`https://api.github.com/repos/${repo}/contents/fotos/${code}.jpg`, {
+          method: "PUT",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Accept": "application/vnd.github+json"
+          },
+          body: JSON.stringify({
+            message: "Subida foto " + code,
+            content: imgBase64,
+            branch: branch
+          })
+        });
+
+        if (res.ok && resFoto.ok) {
+          document.getElementById("estado").textContent = "Ficha subida correctamente.";
         } else {
-          error.innerText = "Error al subir la ficha.";
-          console.error(await response.text());
+          document.getElementById("estado").textContent = "Error al subir la ficha.";
         }
       };
 
       reader.readAsDataURL(foto);
-    });
+    }
   </script>
 </body>
 </html>
