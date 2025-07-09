@@ -49,6 +49,7 @@
         .call { background: #4CAF50; }
         .whatsapp { background: #25D366; }
         .ubicacion { background: #2979FF; }
+        .registro { background: #FF9800; }
     </style>
 </head>
 <body>
@@ -60,6 +61,9 @@
             <a id="btn-llamar" class="call" href="#">Llamar</a>
             <a id="btn-wsp" class="whatsapp" href="#">WhatsApp</a>
             <a id="btn-mapa" class="ubicacion" href="#">Ubicación</a>
+        </div>
+        <div class="botones" id="registro-div" style="display:none;">
+            <a id="btn-registro" class="registro" href="#">Registrar ficha</a>
         </div>
     </div>
 
@@ -84,6 +88,8 @@
             .catch(() => {
                 document.getElementById("nombre").textContent = "Ficha no encontrada";
                 document.getElementById("mensaje").textContent = "Este código aún no fue registrado.";
+                document.getElementById("registro-div").style.display = "block";
+                document.getElementById("btn-registro").href = "registro.html?code=" + code;
             });
     }
     </script>
